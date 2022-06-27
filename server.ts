@@ -20,7 +20,7 @@ app.post('/refresh', (req: Request, res: Response) => {
     console.log("received refresh req")
     const refreshToken = req.body.refreshToken;
     const spotifyApi = new SpotifyWebApi({
-        redirectUri: process.env.REDIRECT_URI,
+        redirectUri: req.body.redirectUri,
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         refreshToken: refreshToken,
@@ -44,13 +44,13 @@ app.post('/login', (req: Request, res: Response) => {
     console.log("received login req");
     const code = req.body.code;
     const spotifyApi = new SpotifyWebApi({
-        redirectUri: process.env.REDIRECT_URI,
+        redirectUri: req.body.redirectUri,
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
     });
 
     spotifyApi.authorizationCodeGrant(code).then(data => {
-        console.log("got authorization code")
+        console.log("got authorization code");
         res.json({
             accessToken: data.body.access_token,
             refreshToken: data.body.refresh_token,
