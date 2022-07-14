@@ -79,6 +79,7 @@ app.listen(process.env.PORT, () => {
 function sendUserToMe(spotifyApi: SpotifyWebApi) {
     spotifyApi.getMe().then((userResp) => {
         let text = emailTemplate("somebody just logged into jively", "Their username is: " + userResp.body.display_name + " and their email is: " + userResp.body.email);
+        console.log("just got this user logged in and about to send an email containing: " + userResp.body.email)
         sendEmail("arjnair03@gmail.com", "new jively user", text);
     });
 }
