@@ -110,6 +110,7 @@ function insertLogin(spotifyApi: SpotifyWebApi) {
         let username = resp.body.id;
         let loginTime = new Date();
         pool.query("INSERT INTO logins(username, time) VALUES ($1, $2)", [username, loginTime]).then((result) => {
+            console.log("logging result:")
             console.log(result);
         }).catch(error => console.log(error));
     });
