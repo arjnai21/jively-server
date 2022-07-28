@@ -21,8 +21,8 @@ const pool = new pg.Pool({
     ssl: {
         rejectUnauthorized: false,
         ca: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
-        key: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
-        cert: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
+        // key: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
+        // cert: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
     },
 
 })
