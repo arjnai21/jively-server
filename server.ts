@@ -101,7 +101,8 @@ function writeUserToDb(spotifyApi: SpotifyWebApi) {
         let username = resp.body.id;
         let email = resp.body.email;
         let loginTime = new Date();
-        pool.query("INSERT INTO users(username, email_address, first_login) VALUES ($1, $2, $3)", [username, email, loginTime]).then((result) => {
+        let displayName = resp.body.display_name;
+        pool.query("INSERT INTO users(username, email_address, first_login, display_name) VALUES ($1, $2, $3, $4)", [username, email, loginTime, displayName]).then((result) => {
             console.log(result);
         }).catch(error => console.log(error)); // will throw error if you try to insert a user that already exists. TODO maybe come up with a better way
     }
