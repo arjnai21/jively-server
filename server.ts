@@ -2,10 +2,21 @@ import express, { Request, Response } from "express";
 import SpotifyWebApi from 'spotify-web-api-node';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import nodemailer from 'nodemailer';
+import pg from 'pg';
+
+
+
 
 require("dotenv").config();
 
+const pool = new pg.Pool({
+    user: process.env.POSTGRES_USER,
+    host: process.env.POSTGRES_HOST,
+    database: process.env.POSTGRES_DATABASE,
+    password: process.env.POSTGRES_PASSWORD,
+    //@ts-ignore
+    port: parseInt(process.env.POSTGRES_PORT),
+})
 
 
 const app = express();
@@ -37,7 +48,7 @@ app.post('/refresh', (req: Request, res: Response) => {
             expiresIn: data.body.expires_in
         });
         spotifyApi.setAccessToken(data.body.access_token);
-        sendUserToMe(spotifyApi);
+        insertLogin(spotifyApi);
     }).catch((err) => {
         console.log("Could not refresh access token", err);
         res.sendStatus(400);
@@ -61,7 +72,7 @@ app.post('/login', (req: Request, res: Response) => {
             expiresIn: data.body.expires_in
         });
         spotifyApi.setAccessToken(data.body.access_token);
-        sendUserToMe(spotifyApi);
+        writeUserToDb(spotifyApi);
 
     }).catch((err) => {
         console.log(err);
@@ -76,45 +87,31 @@ app.listen(process.env.PORT, () => {
     console.log("server started")
 });
 
-function sendUserToMe(spotifyApi: SpotifyWebApi) {
-    spotifyApi.getMe().then((userResp) => {
-        let text = emailTemplate("somebody just logged into jively", "Their username is: " + userResp.body.display_name + " and their email is: " + userResp.body.email);
-        console.log("just got this user logged in and about to send an email containing: " + userResp.body.email)
-        sendEmail("arjnair03@gmail.com", "new jively user", text);
-    });
+function writeUserToDb(spotifyApi: SpotifyWebApi) {
+    console.log("writing user");
+
+    spotifyApi.getMe().then((resp) => {
+        let username = resp.body.id;
+        let email = resp.body.email;
+        let loginTime = new Date();
+        pool.query("INSERT INTO users(username, email_address, first_login) VALUES ($1, $2, $3)", [username, email, loginTime]).then((result) => {
+            console.log(result);
+        }).catch(error => console.log(error));
+    }
+
+    );
+
 }
 
-const emailTemplate = (title: string, body: string) => `<!DOCTYPE html>
-<html lang="en">
-  <head>
-  hello
-  </head>
-  <body>
-    <h1>${title}</h1>
-    <p>${body}</p>
-  </body>
-</html>`;
+function insertLogin(spotifyApi: SpotifyWebApi) {
+    console.log("inserting login");
 
-function sendEmail(to: string, subject: string, message: string) {
-    let transporter = nodemailer.createTransport({
-        service: 'gmail', //change if not using gmail
-        host: 'smtp.gmail.com', // also change if not using gmail
-        port: 465,
-        secure: true,
-        auth: {
-            user: "asnair499@gmail.com",
-            pass: process.env.GMAIL_PASSWORD
-        }
+    spotifyApi.getMe().then((resp) => {
+        let username = resp.body.id;
+        let loginTime = new Date();
+        pool.query("INSERT INTO logins(username, time) VALUES ($1, $2)", [username, loginTime]).then((result) => {
+            console.log(result);
+        }).catch(error => console.log(error));
     });
 
-    let mailDetails = {
-        from: "asnair499@gmail.com",
-        to: to,
-        subject: subject,
-        html: message,
-    };
-
-    transporter.sendMail(mailDetails, function (err, data) {
-        if (err) console.error(err)
-    });
 }
