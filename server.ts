@@ -3,6 +3,7 @@ import SpotifyWebApi from 'spotify-web-api-node';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import pg from 'pg';
+import fs from "fs";
 
 
 
@@ -16,6 +17,13 @@ const pool = new pg.Pool({
     password: process.env.POSTGRES_PASSWORD,
     //@ts-ignore
     port: parseInt(process.env.POSTGRES_PORT),
+    ssl: {
+        rejectUnauthorized: false,
+        ca: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
+        key: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
+        cert: fs.readFileSync('rds-combined-ca-bundle.pem').toString(),
+    },
+
 })
 
 
