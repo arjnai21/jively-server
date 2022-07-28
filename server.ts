@@ -6,9 +6,6 @@ import pg from 'pg';
 import fs from "fs";
 
 
-console.log("CERT:")
-
-console.log(fs.readFileSync('rds-combined-ca-bundle.pem').toString());
 require("dotenv").config();
 
 const pool = new pg.Pool({
