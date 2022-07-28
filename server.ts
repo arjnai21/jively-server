@@ -82,6 +82,7 @@ app.post('/login', (req: Request, res: Response) => {
         });
         spotifyApi.setAccessToken(data.body.access_token);
         writeUserToDb(spotifyApi);
+        insertLogin(spotifyApi);
 
     }).catch((err) => {
         console.log(err);
@@ -105,7 +106,7 @@ function writeUserToDb(spotifyApi: SpotifyWebApi) {
         let loginTime = new Date();
         pool.query("INSERT INTO users(username, email_address, first_login) VALUES ($1, $2, $3)", [username, email, loginTime]).then((result) => {
             console.log(result);
-        }).catch(error => console.log(error));
+        }).catch(error => console.log(error)); // will throw error if you try to insert a user that already exists. TODO maybe come up with a better way
     }
 
     );
@@ -119,8 +120,6 @@ function insertLogin(spotifyApi: SpotifyWebApi) {
         let username = resp.body.id;
         let loginTime = new Date();
         pool.query("INSERT INTO logins(username, time) VALUES ($1, $2)", [username, loginTime]).then((result) => {
-            console.log("logging result:")
-            console.log(result);
         }).catch(error => console.log(error));
     });
 
