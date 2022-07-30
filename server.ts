@@ -115,9 +115,10 @@ function insertLogin(spotifyApi: SpotifyWebApi) {
     console.log("inserting login");
 
     spotifyApi.getMe().then((resp) => {
-        let username = resp.body.id;
+        let spotify_id = resp.body.id;
+        let display_name = resp.body.display_name;
         let loginTime = new Date();
-        pool.query("INSERT INTO logins(spotify_id, time) VALUES ($1, $2)", [username, loginTime]).then((result) => {
+        pool.query("INSERT INTO logins(spotify_id, time, display_name) VALUES ($1, $2, $3)", [spotify_id, loginTime, display_name]).then((result) => {
         }).catch(error => console.log(error));
     });
 
